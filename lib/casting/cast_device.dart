@@ -3,10 +3,10 @@ import 'dart:convert' show utf8;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'package:logging/logging.dart';
-import 'package:observable/observable.dart';
 
 enum CastDeviceType {
   Unknown,
@@ -74,11 +74,10 @@ class CastDevice extends ChangeNotifier {
           bool trustSelfSigned = true;
           HttpClient httpClient = HttpClient()
             ..badCertificateCallback =
-                ((X509Certificate cert, String host, int port) =>
-                    trustSelfSigned);
+                ((X509Certificate cert, String host, int port) => trustSelfSigned);
           IOClient ioClient = new IOClient(httpClient);
-          http.Response response = await ioClient.get(
-              'https://${host}:8443/setup/eureka_info?params=name,device_info');
+          http.Response response = await ioClient
+              .get(Uri.parse('https://$host:8443/setup/eureka_info?params=name,device_info'));
           Map deviceInfo = jsonDecode(response.body);
 
           if (deviceInfo['name'] != null && deviceInfo['name'] != 'Unknown') {
@@ -95,7 +94,7 @@ class CastDevice extends ChangeNotifier {
         }
       }
     }
-    notifyChange();
+    notifyListeners();
   }
 
   CastDeviceType get deviceType {
