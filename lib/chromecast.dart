@@ -76,7 +76,9 @@ class ChromeCastInfo {
     _castSender = CastSender(device);
     final StreamSubscription subscription =
         _castSender!.castSessionController.stream.listen((CastSession? castSession) {
-      if (castSession!.isConnected) {
+      if (castSession == null) {
+        _connected.add(false);
+      } else if (castSession.isConnected) {
         _connected.add(true);
       }
     });

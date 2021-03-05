@@ -239,7 +239,9 @@ class CastSender extends Object {
     log.fine(payload.toString());
     if (null == _mediaChannel && true == payload['status']?.containsKey('applications')) {
       // re-create the channel with the transportId the chromecast just sent us
-      if (false == _castSession!.isConnected) {
+      if (_castSession == null) {
+        castSessionController.add(null);
+      } else if (false == _castSession!.isConnected) {
         _castSession = _castSession!
           ..mergeWithChromeCastSessionMap(payload['status']['applications'][0]);
         _connectionChannel = ConnectionChannel.create(_socket,
