@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dart_chromecast/proto/cast_channel.pb.dart';
-import 'package:dart_chromecast/writer.dart';
+import 'package:dart_chromecast/utils/writer.dart';
 
 
 abstract class CastChannel {
