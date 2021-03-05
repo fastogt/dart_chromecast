@@ -1,0 +1,5 @@
+include: package:dart_rules/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - lib/proto/**

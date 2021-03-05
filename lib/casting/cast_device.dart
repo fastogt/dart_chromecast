@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:convert' show utf8;
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -68,14 +69,14 @@ class CastDevice extends ChangeNotifier {
         // Attributes are not guaranteed to be set, if not set fetch them via the eureka_info url
         // Possible parameters: version,audio,name,build_info,detail,device_info,net,wifi,setup,settings,opt_in,opencast,multizone,proxy,night_mode_params,user_eq,room_equalizer
         try {
-          bool trustSelfSigned = true;
-          HttpClient httpClient = HttpClient()
+          const bool trustSelfSigned = true;
+          final HttpClient httpClient = HttpClient()
             ..badCertificateCallback =
                 ((X509Certificate cert, String host, int port) => trustSelfSigned);
-          IOClient ioClient = new IOClient(httpClient);
-          http.Response response = await ioClient
+          final IOClient ioClient = IOClient(httpClient);
+          final http.Response response = await ioClient
               .get(Uri.parse('https://$host:8443/setup/eureka_info?params=name,device_info'));
-          Map deviceInfo = jsonDecode(response.body);
+          final Map deviceInfo = jsonDecode(response.body);
 
           if (deviceInfo['name'] != null && deviceInfo['name'] != 'Unknown') {
             _friendlyName = deviceInfo['name'];
@@ -87,7 +88,7 @@ class CastDevice extends ChangeNotifier {
             _modelName = deviceInfo['model_name'];
           }
         } catch (exception) {
-          print(exception.toString());
+          log(exception.toString());
         }
       }
     }
@@ -118,7 +119,6 @@ class CastDevice extends ChangeNotifier {
         return GoogleCastModelType.GoogleHome;
       case "Google Home Hub":
         return GoogleCastModelType.GoogleHub;
-        break;
       case "Google Home Mini":
         return GoogleCastModelType.GoogleMini;
       case "Google Home Max":

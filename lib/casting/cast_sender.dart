@@ -1,7 +1,7 @@
-/**
- * TODO:
- * - volume, treble, bass?
- */
+///
+/// TODO:
+/// - volume, treble, bass?
+///
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -51,10 +51,8 @@ class CastSender extends Object {
   Future<bool> connect() async {
     connectionDidClose = false;
 
-    if (null == _castSession) {
-      _castSession =
-          CastSession(sourceId: 'client-${Random().nextInt(99999)}', destinationId: 'receiver-0');
-    }
+    _castSession ??=
+        CastSession(sourceId: 'client-${Random().nextInt(99999)}', destinationId: 'receiver-0');
 
     // connect to socket
     if (null == await _createSocket()) {
@@ -76,7 +74,7 @@ class CastSender extends Object {
 
   Future<bool> reconnect({String? sourceId, String? destinationId}) async {
     _castSession = CastSession(sourceId: sourceId, destinationId: destinationId);
-    bool connected = await connect();
+    final bool connected = await connect();
     if (!connected) {
       return false;
     }
@@ -86,7 +84,7 @@ class CastSender extends Object {
     _mediaChannel!.sendMessage({'type': 'GET_STATUS'});
 
     // now wait for the media to actually get a status?
-    bool didReconnect = await _waitForMediaStatus();
+    final bool didReconnect = await _waitForMediaStatus();
     if (didReconnect) {
       log.fine('reconnecting successful!');
       try {
@@ -132,7 +130,7 @@ class CastSender extends Object {
     }
   }
 
-  void load(CastMedia media, {forceNext = true}) {
+  void load(CastMedia media, {bool forceNext = true}) {
     loadPlaylist([media], forceNext: forceNext);
   }
 
@@ -182,12 +180,12 @@ class CastSender extends Object {
   }
 
   void seek(double time) {
-    Map<String, dynamic> map = {'currentTime': time};
+    final Map<String, dynamic> map = {'currentTime': time};
     _castMediaAction('SEEK', map);
   }
 
   void setVolume(double volume) {
-    Map<String, dynamic> map = {'volume': min(volume, 1)};
+    final Map<String, dynamic> map = {'volume': min(volume, 1)};
     _castMediaAction('VOLUME', map);
   }
 
@@ -202,7 +200,7 @@ class CastSender extends Object {
 
         _socket = await SecureSocket.connect(device.host, device.port!,
             onBadCertificate: (X509Certificate certificate) => true,
-            timeout: Duration(seconds: 10));
+            timeout: const Duration(seconds: 10));
 
         _connectionChannel = ConnectionChannel.create(_socket,
             sourceId: _castSession!.sourceId, destinationId: _castSession!.destinationId);
@@ -221,10 +219,10 @@ class CastSender extends Object {
   }
 
   void _onSocketData(List<int> event) {
-    List<int> slice = event.getRange(4, event.length).toList();
+    final List<int> slice = event.getRange(4, event.length).toList();
 
-    CastMessage message = CastMessage.fromBuffer(slice);
-    Map<String, dynamic> payloadMap = jsonDecode(message.payloadUtf8);
+    final CastMessage message = CastMessage.fromBuffer(slice);
+    final Map<String, dynamic> payloadMap = jsonDecode(message.payloadUtf8);
     log.fine(payloadMap['type']);
     if ('CLOSE' == payloadMap['type']) {
       _dispose();
@@ -266,14 +264,14 @@ class CastSender extends Object {
 
   Future<bool> _waitForMediaStatus() async {
     while (false == _castSession!.isConnected) {
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
       if (connectionDidClose) return false;
     }
     return _castSession!.isConnected;
   }
 
   void _handleMediaStatus(Map payload) {
-    log.fine('Handle media status: ' + payload.toString());
+    log.fine('Handle media status: ${payload.toString()}');
 
     if (null != payload['status']) {
       if (!_castSession!.isConnected) {
@@ -292,7 +290,7 @@ class CastSender extends Object {
         }
 
         if (_castSession!.castMediaStatus!.isPlaying) {
-          _mediaCurrentTimeTimer = Timer(Duration(seconds: 1), _getMediaCurrentTime);
+          _mediaCurrentTimeTimer = Timer(const Duration(seconds: 1), _getMediaCurrentTime);
         } else if (_castSession!.castMediaStatus!.isPaused && null != _mediaCurrentTimeTimer) {
           _mediaCurrentTimeTimer!.cancel();
           _mediaCurrentTimeTimer = null;
@@ -317,7 +315,7 @@ class CastSender extends Object {
     }
   }
 
-  _handleContentQueue({forceNext = false}) {
+  void _handleContentQueue({bool forceNext = false}) {
     if (null == _mediaChannel || _contentQueue.isEmpty) {
       return;
     }
@@ -348,7 +346,7 @@ class CastSender extends Object {
       _heartbeatChannel!.sendMessage({'type': 'PING'});
 
 //      _heartbeatTimer = Timer(Duration(seconds: 5), _heartbeatTick);
-      Timer(Duration(seconds: 5), _heartbeatTick);
+      Timer(const Duration(seconds: 5), _heartbeatTick);
     }
   }
 

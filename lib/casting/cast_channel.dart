@@ -1,17 +1,19 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
-import './../writer.dart';
-import '../proto/cast_channel.pb.dart';
+import 'package:dart_chromecast/proto/cast_channel.pb.dart';
+import 'package:dart_chromecast/writer.dart';
+
 
 abstract class CastChannel {
   static int _requestId = 1;
 
   final Socket? _socket;
-  String? _sourceId;
-  String? _destinationId;
-  String? _namespace;
+  final String? _sourceId;
+  final String? _destinationId;
+  final String? _namespace;
 
   CastChannel(this._socket, this._sourceId, this._destinationId, this._namespace);
 
@@ -25,7 +27,7 @@ abstract class CastChannel {
   void sendMessage(Map payload) async {
     payload['requestId'] = _requestId;
 
-    CastMessage castMessage = CastMessage();
+    final CastMessage castMessage = CastMessage();
     castMessage.protocolVersion = CastMessage_ProtocolVersion.CASTV2_1_0;
     castMessage.sourceId = _sourceId!;
     castMessage.destinationId = _destinationId!;
@@ -33,20 +35,15 @@ abstract class CastChannel {
     castMessage.payloadType = CastMessage_PayloadType.STRING;
     castMessage.payloadUtf8 = jsonEncode(payload);
 
-    Uint8List bytes = castMessage.writeToBuffer();
-    Uint32List headers = Uint32List.fromList(writeUInt32BE(<int>[], bytes.lengthInBytes));
-    Uint32List fullData = Uint32List.fromList(headers.toList()..addAll(bytes.toList()));
+    final Uint8List bytes = castMessage.writeToBuffer();
+    final Uint32List headers = Uint32List.fromList(writeUInt32BE(<int>[], bytes.lengthInBytes));
+    final Uint32List fullData = Uint32List.fromList(headers.toList()..addAll(bytes.toList()));
 
-    if ('PING' != payload['type']) {
-      // print('Send: ${castMessage.toDebugString()}');
-      // print('List: ${fullData.toList().toString()}');
-
-    } else {
-      print('PING');
+    if ('PING' == payload['type']) {
+      log('PING');
     }
 
     _socket!.add(fullData);
-
     _requestId++;
   }
 }
