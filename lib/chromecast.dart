@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:dart_chromecast/casting/cast.dart';
@@ -12,7 +10,7 @@ import 'package:rxdart/rxdart.dart';
 class ChromeCastInfo {
   static final ChromeCastInfo _instance = ChromeCastInfo._internal();
 
-  CastSender _castSender;
+  CastSender? _castSender;
   final BehaviorSubject<List<CastDevice>> _foundServices = BehaviorSubject<List<CastDevice>>();
   final BehaviorSubject<bool> _connected = BehaviorSubject<bool>();
 
@@ -36,7 +34,7 @@ class ChromeCastInfo {
   }
 
   void pickDeviceDialog(BuildContext context,
-      {void Function() onConnected,
+      {VoidCallback? onConnected,
       ChromeCastDevicePickerText translations = const ChromeCastDevicePickerText()}) {
     showDialog(
         context: context,
@@ -50,9 +48,9 @@ class ChromeCastInfo {
   }
 
   void disconnectDialog(BuildContext context,
-      {void Function() onDisconnected,
+      {VoidCallback? onDisconnected,
       CCDisconnectDialogText translations = const CCDisconnectDialogText()}) {
-    if (_connected.value) {
+    if (_connected.value!) {
       showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -68,7 +66,7 @@ class ChromeCastInfo {
 
   void disconnect() async {
     if (_castSender != null) {
-      _castSender.disconnect();
+      _castSender!.disconnect();
       _castSender = null;
       _connected.add(false);
     }
@@ -77,41 +75,54 @@ class ChromeCastInfo {
   Future<bool> connectToDevice(CastDevice device) {
     _castSender = CastSender(device);
     final StreamSubscription subscription =
-        _castSender.castSessionController.stream.listen((CastSession castSession) {
-      if (castSession.isConnected) {
+        _castSender!.castSessionController.stream.listen((CastSession? castSession) {
+      if (castSession!.isConnected) {
         _connected.add(true);
       }
     });
 
-    return _castSender.connect().then((connected) {
+    return _castSender!.connect().then((connected) {
       if (!connected) {
         subscription.cancel();
         _castSender = null;
       }
-      _castSender.launch();
+      _castSender!.launch();
       return connected;
     });
   }
 
-  CastSender get castSender => _castSender;
+  CastSender? get castSender => _castSender;
 
   Stream<List<CastDevice>> get foundServices => _foundServices.stream;
 
-  bool get castConnected => _connected.value;
+  bool get castConnected => _connected.value!;
 
   Stream<bool> get castConnectedStream => _connected.stream;
 
-  void play() => _castSender.play();
+  void play() {
+    if (_castSender == null) {
+      return;
+    }
+    _castSender!.play();
+  }
 
-  void pause() => _castSender.pause();
+  void pause() {
+    if (_castSender == null) {
+      return;
+    }
+    _castSender!.pause();
+  }
 
-  double position() => _castSender.castSession?.castMediaStatus?.position;
+  double? position() => _castSender?.castSession?.castMediaStatus?.position;
 
   bool serviceFound() => _foundServices.value?.isNotEmpty ?? false;
 
   void initVideo(String contentID, String title) {
+    if (_castSender == null) {
+      return;
+    }
     final castMedia = CastMedia(contentId: contentID, title: title);
-    _castSender.load(castMedia);
+    _castSender!.load(castMedia);
   }
 
   void togglePlayPauseCC() {
@@ -119,23 +130,21 @@ class ChromeCastInfo {
       return;
     }
 
-    isPlaying() ? castSender.togglePause() : castSender.play();
+    isPlaying() ? castSender!.togglePause() : castSender!.play();
   }
 
   void setVolume(double volume) {
     if (_castSender == null) {
       return;
     }
-    _castSender.setVolume(volume);
+    _castSender!.setVolume(volume);
   }
 
   bool isPlaying() {
-    if (_castSender == null ||
-        _castSender.castSession == null ||
-        _castSender.castSession.castMediaStatus == null) {
+    if (_castSender?.castSession?.castMediaStatus == null) {
       return false;
     }
 
-    return _castSender.castSession.castMediaStatus.isPlaying;
+    return _castSender!.castSession!.castMediaStatus!.isPlaying;
   }
 }

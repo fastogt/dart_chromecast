@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 class CCDisconnectDialogText {
@@ -16,7 +14,7 @@ class CCDisconnectDialogText {
 }
 
 class CCDisconnectDialog extends StatelessWidget {
-  final Color textColor;
+  final Color? textColor;
   final CCDisconnectDialogText text;
 
   const CCDisconnectDialog({this.textColor, this.text = const CCDisconnectDialogText()});

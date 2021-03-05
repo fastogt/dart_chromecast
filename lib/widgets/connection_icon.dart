@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:core';
 
 import 'package:dart_chromecast/casting/cast.dart';
@@ -7,7 +5,7 @@ import 'package:dart_chromecast/chromecast.dart';
 import 'package:flutter/material.dart';
 
 class ChromeCastIcon extends StatelessWidget {
-  final void Function(bool connected) onChromeCast;
+  final void Function(bool connected)? onChromeCast;
 
   const ChromeCastIcon({this.onChromeCast});
 
@@ -17,7 +15,8 @@ class ChromeCastIcon extends StatelessWidget {
         initialData: const [],
         stream: ChromeCastInfo().foundServices,
         builder: (context, snapshot) {
-          if (snapshot.data.isEmpty) {
+          final List<CastDevice> devices = snapshot.data!;
+          if (devices.isEmpty) {
             return const SizedBox();
           }
 
@@ -25,7 +24,7 @@ class ChromeCastIcon extends StatelessWidget {
               initialData: false,
               stream: ChromeCastInfo().castConnectedStream,
               builder: (context, snapshot) {
-                if (snapshot.data) {
+                if (snapshot.data!) {
                   return IconButton(
                       icon: const Icon(Icons.cast_connected),
                       onPressed: () {

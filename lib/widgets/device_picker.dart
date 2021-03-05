@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:dart_chromecast/casting/cast_device.dart';
@@ -43,12 +41,13 @@ class ChromeCastDevicePicker extends StatelessWidget {
         initialData: const [],
         stream: devices,
         builder: (context, snapshot) {
-          if (snapshot.data.isNotEmpty) {
+          final List<CastDevice> devices = snapshot.data!;
+          if (devices.isNotEmpty) {
             return SingleChildScrollView(
                 child: Column(
-                    children: List<CastDeviceTile>.generate(snapshot.data.length, (int index) {
-              return CastDeviceTile(snapshot.data[index], () {
-                ChromeCastInfo().connectToDevice(snapshot.data[index]).then((value) {
+                    children: List<CastDeviceTile>.generate(devices.length, (int index) {
+              return CastDeviceTile(devices[index], () {
+                ChromeCastInfo().connectToDevice(devices[index]).then((value) {
                   Navigator.pop(context, value);
                 });
               });
@@ -84,7 +83,7 @@ class _CastDeviceTileState extends State<CastDeviceTile> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(title: Text(widget.device.friendlyName), onTap: widget.onTap);
+    return ListTile(title: Text(widget.device.friendlyName ?? ''), onTap: widget.onTap);
   }
 
   void _update() {
