@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:dart_chromecast/casting/cast_channel.dart';
 
 class ConnectionChannel extends CastChannel {
-  ConnectionChannel.create(Socket socket, {String sourceId, String destinationId})
+  ConnectionChannel.create(Socket? socket, {String? sourceId, String? destinationId})
       : super.createWithSocket(socket,
             sourceId: sourceId ?? 'sender-0',
             destinationId: destinationId ?? 'receiver-0',

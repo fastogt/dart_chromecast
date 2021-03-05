@@ -25,10 +25,10 @@ enum GoogleCastModelType {
 }
 
 class CastDevice extends ChangeNotifier {
-  final String name;
-  final String type;
-  final String host;
-  final int port;
+  final String? name;
+  final String? type;
+  final String? host;
+  final int? port;
 
   /// Contains the information about the device.
   /// You can decode with utf8 a bunch of information
@@ -42,10 +42,10 @@ class CastDevice extends ChangeNotifier {
   /// * ca - Unknown (e.g. "1234");
   /// * ic - Icon path (e.g. "/setup/icon.png");
   /// * ve - Version (e.g. "04").
-  final Map<String, Uint8List> attr;
+  final Map<String, Uint8List>? attr;
 
-  String _friendlyName;
-  String _modelName;
+  String? _friendlyName;
+  String? _modelName;
 
   CastDevice({
     this.name,
@@ -59,10 +59,10 @@ class CastDevice extends ChangeNotifier {
 
   void initDeviceInfo() async {
     if (CastDeviceType.ChromeCast == deviceType) {
-      if (null != attr && null != attr['fn']) {
-        _friendlyName = utf8.decode(attr['fn']);
-        if (null != attr['md']) {
-          _modelName = utf8.decode(attr['md']);
+      if (null != attr && null != attr!['fn']) {
+        _friendlyName = utf8.decode(attr!['fn']!);
+        if (null != attr!['md']) {
+          _modelName = utf8.decode(attr!['md']!);
         }
       } else {
         // Attributes are not guaranteed to be set, if not set fetch them via the eureka_info url
@@ -95,22 +95,22 @@ class CastDevice extends ChangeNotifier {
   }
 
   CastDeviceType get deviceType {
-    if (type.contains('_googlecast._tcp')) {
+    if (type!.contains('_googlecast._tcp')) {
       return CastDeviceType.ChromeCast;
-    } else if (type.contains('_airplay._tcp')) {
+    } else if (type!.contains('_airplay._tcp')) {
       return CastDeviceType.AppleTV;
     }
     return CastDeviceType.Unknown;
   }
 
-  String get friendlyName {
+  String? get friendlyName {
     if (null != _friendlyName) {
       return _friendlyName;
     }
     return name;
   }
 
-  String get modelName => _modelName;
+  String? get modelName => _modelName;
 
   GoogleCastModelType get googleModelType {
     switch (modelName) {
