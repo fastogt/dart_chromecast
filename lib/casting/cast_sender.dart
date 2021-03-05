@@ -16,10 +16,10 @@ import 'package:dart_chromecast/casting/heartbeat_channel.dart';
 import 'package:dart_chromecast/casting/media_channel.dart';
 import 'package:dart_chromecast/casting/receiver_channel.dart';
 import 'package:dart_chromecast/proto/cast_channel.pb.dart';
-import 'package:logging/logging.dart';
+import 'package:dart_chromecast/utils/log.dart';
 
 class CastSender extends Object {
-  final Logger log = new Logger('CastSender');
+  final Logger log = const Logger('CastSender');
   final CastDevice device;
 
   SecureSocket _socket;
@@ -52,9 +52,8 @@ class CastSender extends Object {
     connectionDidClose = false;
 
     if (null == _castSession) {
-      _castSession = CastSession(
-          sourceId: 'client-${Random().nextInt(99999)}',
-          destinationId: 'receiver-0');
+      _castSession =
+          CastSession(sourceId: 'client-${Random().nextInt(99999)}', destinationId: 'receiver-0');
     }
 
     // connect to socket
@@ -76,15 +75,14 @@ class CastSender extends Object {
   }
 
   Future<bool> reconnect({String sourceId, String destinationId}) async {
-    _castSession =
-        CastSession(sourceId: sourceId, destinationId: destinationId);
+    _castSession = CastSession(sourceId: sourceId, destinationId: destinationId);
     bool connected = await connect();
     if (!connected) {
       return false;
     }
 
-    _mediaChannel = MediaChannel.Create(
-        socket: _socket, sourceId: sourceId, destinationId: destinationId);
+    _mediaChannel =
+        MediaChannel.create(socket: _socket, sourceId: sourceId, destinationId: destinationId);
     _mediaChannel.sendMessage({'type': 'GET_STATUS'});
 
     // now wait for the media to actually get a status?
@@ -119,9 +117,7 @@ class CastSender extends Object {
         'sessionId': _castSession.castMediaStatus.sessionId,
       });
     }
-    if (null != _socket) {
-      await _socket.destroy();
-    }
+    _socket?.destroy();
     _dispose();
     connectionDidClose = true;
     return true;
@@ -140,8 +136,7 @@ class CastSender extends Object {
     loadPlaylist([media], forceNext: forceNext);
   }
 
-  void loadPlaylist(List<CastMedia> media,
-      {append = false, forceNext = false}) {
+  void loadPlaylist(List<CastMedia> media, {bool append = false, bool forceNext = false}) {
     if (!append) {
       _contentQueue = media;
     } else {
@@ -152,8 +147,8 @@ class CastSender extends Object {
     }
   }
 
-  void _castMediaAction(type, [params]) {
-    if (null == params) params = {};
+  void _castMediaAction(String type, [Map<String, dynamic> params]) {
+    params ??= {};
     if (null != _mediaChannel && null != _castSession?.castMediaStatus) {
       _mediaChannel.sendMessage(params
         ..addAll({
@@ -211,14 +206,11 @@ class CastSender extends Object {
             timeout: Duration(seconds: 10));
 
         _connectionChannel = ConnectionChannel.create(_socket,
-            sourceId: _castSession.sourceId,
-            destinationId: _castSession.destinationId);
+            sourceId: _castSession.sourceId, destinationId: _castSession.destinationId);
         _heartbeatChannel = HeartbeatChannel.create(_socket,
-            sourceId: _castSession.sourceId,
-            destinationId: _castSession.destinationId);
+            sourceId: _castSession.sourceId, destinationId: _castSession.destinationId);
         _receiverChannel = ReceiverChannel.create(_socket,
-            sourceId: _castSession.sourceId,
-            destinationId: _castSession.destinationId);
+            sourceId: _castSession.sourceId, destinationId: _castSession.destinationId);
 
         _socket.listen(_onSocketData, onDone: _dispose);
       } catch (e) {
@@ -253,17 +245,15 @@ class CastSender extends Object {
 
   void _handleReceiverStatus(Map payload) {
     log.fine(payload.toString());
-    if (null == _mediaChannel &&
-        true == payload['status']?.containsKey('applications')) {
+    if (null == _mediaChannel && true == payload['status']?.containsKey('applications')) {
       // re-create the channel with the transportId the chromecast just sent us
       if (false == _castSession?.isConnected) {
         _castSession = _castSession
           ..mergeWithChromeCastSessionMap(payload['status']['applications'][0]);
         _connectionChannel = ConnectionChannel.create(_socket,
-            sourceId: _castSession.sourceId,
-            destinationId: _castSession.destinationId);
+            sourceId: _castSession.sourceId, destinationId: _castSession.destinationId);
         _connectionChannel.sendMessage({'type': 'CONNECT'});
-        _mediaChannel = MediaChannel.Create(
+        _mediaChannel = MediaChannel.create(
             socket: _socket,
             sourceId: _castSession.sourceId,
             destinationId: _castSession.destinationId);
@@ -308,10 +298,8 @@ class CastSender extends Object {
         }
 
         if (_castSession.castMediaStatus.isPlaying) {
-          _mediaCurrentTimeTimer =
-              Timer(Duration(seconds: 1), _getMediaCurrentTime);
-        } else if (_castSession.castMediaStatus.isPaused &&
-            null != _mediaCurrentTimeTimer) {
+          _mediaCurrentTimeTimer = Timer(Duration(seconds: 1), _getMediaCurrentTime);
+        } else if (_castSession.castMediaStatus.isPaused && null != _mediaCurrentTimeTimer) {
           _mediaCurrentTimeTimer.cancel();
           _mediaCurrentTimeTimer = null;
         }
@@ -328,8 +316,7 @@ class CastSender extends Object {
         log.fine("Media status is empty");
 
         if (null == _currentCastMedia && _contentQueue.isNotEmpty) {
-          log.fine(
-              "no media is currently being casted, try to cast first in queue");
+          log.fine("no media is currently being casted, try to cast first in queue");
           _handleContentQueue();
         }
       }
@@ -355,8 +342,7 @@ class CastSender extends Object {
   }
 
   void _getMediaCurrentTime() {
-    if (null != _mediaChannel &&
-        true == _castSession?.castMediaStatus?.isPlaying) {
+    if (null != _mediaChannel && true == _castSession?.castMediaStatus?.isPlaying) {
       _mediaChannel.sendMessage({
         'type': 'GET_STATUS',
       });
@@ -382,17 +368,5 @@ class CastSender extends Object {
     _mediaChannel = null;
     _castSession = null;
     _contentQueue = [];
-  }
-
-  @override
-  logError(String message, [Error error]) {
-    // TODO: implement logError
-    return null;
-  }
-
-  @override
-  logInfo(String message) {
-    // TODO: implement logInfo
-    return null;
   }
 }

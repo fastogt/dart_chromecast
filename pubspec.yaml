@@ -1,5 +1,5 @@
 name: dart_chromecast
-version: 0.2.4
+version: 0.3.0
 description: Cast videos to your ChromeCast device using Dart
 homepage: https://github.com/terrabythia/dart_chromecast
 publish_to: none
@@ -9,11 +9,13 @@ environment:
   flutter: '>=1.20.0'
 
 dependencies:
-  protobuf: '^2.0.0'
+  protobuf: ^2.0.0
   protoc_plugin: ^20.0.0
   http: ^0.13.0
-  args: ^2.0.0
-  logging: ^1.0.0
-  multicast_dns: ^0.2.2
+  multicast_dns:
+    git:
+      url: https://github.com/flutter/packages.git
+      path: packages/multicast_dns
+      ref: master
   flutter:
     sdk: flutter

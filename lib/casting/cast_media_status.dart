@@ -1,11 +1,7 @@
 import 'dart:convert';
-import 'package:logging/logging.dart';
 
 class CastMediaStatus {
-
-  final Logger log = new Logger('CastMediaStatus');
-
-  dynamic _sessionId;
+  String _sessionId;
 
   final String _nativeStatus;
   final bool _isPlaying;

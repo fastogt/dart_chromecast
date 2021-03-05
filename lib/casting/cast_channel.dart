@@ -13,10 +13,9 @@ abstract class CastChannel {
   String _destinationId;
   String _namespace;
 
-  CastChannel(
-      this._socket, this._sourceId, this._destinationId, this._namespace);
+  CastChannel(this._socket, this._sourceId, this._destinationId, this._namespace);
 
-  CastChannel.CreateWithSocket(Socket socket,
+  CastChannel.createWithSocket(Socket socket,
       {String sourceId, String destinationId, String namespace})
       : _socket = socket,
         _sourceId = sourceId,
@@ -35,10 +34,8 @@ abstract class CastChannel {
     castMessage.payloadUtf8 = jsonEncode(payload);
 
     Uint8List bytes = castMessage.writeToBuffer();
-    Uint32List headers =
-        Uint32List.fromList(writeUInt32BE(List<int>(4), bytes.lengthInBytes));
-    Uint32List fullData =
-        Uint32List.fromList(headers.toList()..addAll(bytes.toList()));
+    Uint32List headers = Uint32List.fromList(writeUInt32BE(<int>[], bytes.lengthInBytes));
+    Uint32List fullData = Uint32List.fromList(headers.toList()..addAll(bytes.toList()));
 
     if ('PING' != payload['type']) {
       // print('Send: ${castMessage.toDebugString()}');
