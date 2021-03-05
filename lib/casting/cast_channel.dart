@@ -36,7 +36,7 @@ abstract class CastChannel {
     castMessage.payloadUtf8 = jsonEncode(payload);
 
     final Uint8List bytes = castMessage.writeToBuffer();
-    final Uint32List headers = Uint32List.fromList(writeUInt32BE(<int>[], bytes.lengthInBytes));
+    final Uint32List headers = Uint32List.fromList(writeUInt32BE(bytes.lengthInBytes));
     final Uint32List fullData = Uint32List.fromList(headers.toList()..addAll(bytes.toList()));
 
     if ('PING' == payload['type']) {

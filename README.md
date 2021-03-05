@@ -1,11 +1,9 @@
-# dart_chromecast
+# chromecast
 Dart package to play videos to a chromecast device
 
 **This package is currently under development and the API can change completely at some point. Use at your own risk.**
 
 Simplified port of https://github.com/thibauts/node-castv2-client.
-
-Update 0.2.0: added MDNS finder, you can now omit the --host parameter and it will ask you which chromecast to use
 
 ---
 
@@ -54,9 +52,6 @@ In this demo the following keys can be used to control the playback of the video
 `esc` disconnect device \
 `left arrow key` seek -10 seconds \
 `right arrow key` seek +10 seconds
-
-### example
-`dart index.dart http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4`
 
 ### reconnecting to active session
 When you exit the command line without disconnecting the device, the video will keep playing. 

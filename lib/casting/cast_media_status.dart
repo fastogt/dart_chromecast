@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class CastMediaStatus {
-  final String? _sessionId;
+  final dynamic? _sessionId;
 
   final String? _nativeStatus;
   final bool _isPlaying;

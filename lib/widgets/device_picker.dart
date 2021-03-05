@@ -17,57 +17,45 @@ class ChromeCastDevicePickerText {
       this.cancel = "Cancel"});
 }
 
-class ChromeCastDevicePicker extends StatefulWidget {
+class ChromeCastDevicePicker extends StatelessWidget {
+  final Stream<List<CastDevice>> devices;
   final ChromeCastDevicePickerText text;
 
-  const ChromeCastDevicePicker({this.text = const ChromeCastDevicePickerText()});
-
-  @override
-  _ChromeCastDevicePickerState createState() {
-    return _ChromeCastDevicePickerState();
-  }
-}
-
-class _ChromeCastDevicePickerState extends State<ChromeCastDevicePicker> {
-  final List<CastDevice> _devices = [];
-  bool isReady = true;
-
-  @override
-  void initState() {
-    super.initState();
-    ChromeCastInfo().setCallbackOnConnect(() => Navigator.pop(context, true));
-  }
+  const ChromeCastDevicePicker(this.devices, {this.text = const ChromeCastDevicePickerText()});
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        title: Text(isReady ? widget.text.chooseDevice : widget.text.connecting),
-        content: isReady
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                itemCount: _devices.length,
-                itemBuilder: (_, int index) {
-                  return CastDeviceTile(_devices[index], () {
-                    _pickDevice(_devices[index]);
-                  });
-                }),
+        title: Text(text.chooseDevice),
+        content: _devices(),
         contentPadding: const EdgeInsets.fromLTRB(8, 20.0, 8, 0),
         actions: <Widget>[
-          if (isReady)
-            TextButton(
-                child: Text(widget.text.cancel,
-                    style: TextStyle(color: Theme.of(context).accentColor)),
-                onPressed: () {
-                  Navigator.pop(context, false);
-                })
+          TextButton(
+              child: Text(text.cancel, style: TextStyle(color: Theme.of(context).accentColor)),
+              onPressed: () {
+                Navigator.pop(context, false);
+              })
         ]);
   }
 
-  Future<void> _pickDevice(CastDevice device) async {
-    setState(() {
-      isReady = false;
-    });
-    await ChromeCastInfo().onDevicePicked(device);
+  Widget _devices() {
+    return StreamBuilder<List<CastDevice>>(
+        initialData: const [],
+        stream: devices,
+        builder: (context, snapshot) {
+          if (snapshot.data.isNotEmpty) {
+            return SingleChildScrollView(
+                child: Column(
+                    children: List<CastDeviceTile>.generate(snapshot.data.length, (int index) {
+              return CastDeviceTile(snapshot.data[index], () {
+                ChromeCastInfo().connectToDevice(snapshot.data[index]).then((value) {
+                  Navigator.pop(context, value);
+                });
+              });
+            })));
+          }
+          return const SizedBox(height: 56, child: Center(child: CircularProgressIndicator()));
+        });
   }
 }
 
@@ -96,9 +84,7 @@ class _CastDeviceTileState extends State<CastDeviceTile> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-        title: Text(widget.device.friendlyName),
-        onTap: null == ChromeCastInfo().onDevicePicked ? null : widget.onTap);
+    return ListTile(title: Text(widget.device.friendlyName), onTap: widget.onTap);
   }
 
   void _update() {

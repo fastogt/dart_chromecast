@@ -7,31 +7,32 @@ import 'package:dart_chromecast/widgets/device_picker.dart';
 import 'package:dart_chromecast/widgets/disconnect_dialog.dart';
 import 'package:dart_chromecast/utils/mdns_find_chromecast.dart' as find;
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ChromeCastInfo {
-  static const int DISCOVERY_TIME_SEC = 3;
   static final ChromeCastInfo _instance = ChromeCastInfo._internal();
 
   CastSender _castSender;
-  bool _castConnected;
-  Function _callbackOnConnected;
-  List<CastDevice> _foundServices = [];
+  final BehaviorSubject<List<CastDevice>> _foundServices = BehaviorSubject<List<CastDevice>>();
+  final BehaviorSubject<bool> _connected = BehaviorSubject<bool>();
 
   factory ChromeCastInfo() {
     return _instance;
   }
 
   ChromeCastInfo._internal() {
+    _connected.add(false);
+    _foundServices.add([]);
     _refreshDevices();
   }
 
   Future<void> _refreshDevices() async {
-    _foundServices = [];
     final List<find.CastDevice> _found = await find.findChromecasts();
+    final List<CastDevice> result = [];
     for (final find.CastDevice d in _found) {
-      _foundServices
-          .add(CastDevice(name: d.name, host: d.ip, port: d.port, type: '_googlecast._tcp'));
+      result.add(CastDevice(name: d.name, host: d.ip, port: d.port, type: '_googlecast._tcp'));
     }
+    _foundServices.add(result);
   }
 
   void pickDeviceDialog(BuildContext context,
@@ -40,7 +41,7 @@ class ChromeCastInfo {
     showDialog(
         context: context,
         builder: (context) {
-          return ChromeCastDevicePicker(text: translations);
+          return ChromeCastDevicePicker(_foundServices.stream, text: translations);
         }).then((connected) {
       if (connected ?? false) {
         onConnected?.call();
@@ -51,7 +52,7 @@ class ChromeCastInfo {
   void disconnectDialog(BuildContext context,
       {void Function() onDisconnected,
       CCDisconnectDialogText translations = const CCDisconnectDialogText()}) {
-    if (ChromeCastInfo().castConnected) {
+    if (_connected.value) {
       showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -69,21 +70,16 @@ class ChromeCastInfo {
     if (_castSender != null) {
       _castSender.disconnect();
       _castSender = null;
-      _castConnected = false;
+      _connected.add(false);
     }
   }
 
-  void _castSessionIsConnected(CastSession castSession) {
-    _castConnected = true;
-    _callbackOnConnected?.call();
-  }
-
-  Future<bool> _connectToDevice(CastDevice device) {
+  Future<bool> connectToDevice(CastDevice device) {
     _castSender = CastSender(device);
     final StreamSubscription subscription =
         _castSender.castSessionController.stream.listen((CastSession castSession) {
       if (castSession.isConnected) {
-        _castSessionIsConnected(castSession);
+        _connected.add(true);
       }
     });
 
@@ -99,11 +95,11 @@ class ChromeCastInfo {
 
   CastSender get castSender => _castSender;
 
-  List<CastDevice> get foundServices => _foundServices;
+  Stream<List<CastDevice>> get foundServices => _foundServices.stream;
 
-  Future Function(CastDevice) get onDevicePicked => _connectToDevice;
+  bool get castConnected => _connected.value;
 
-  bool get castConnected => _castConnected ?? false;
+  Stream<bool> get castConnectedStream => _connected.stream;
 
   void play() => _castSender.play();
 
@@ -111,18 +107,11 @@ class ChromeCastInfo {
 
   double position() => _castSender.castSession?.castMediaStatus?.position;
 
-  bool serviceFound() => _foundServices.isNotEmpty;
+  bool serviceFound() => _foundServices.value?.isNotEmpty ?? false;
 
   void initVideo(String contentID, String title) {
-    final castMedia = CastMedia(
-      contentId: contentID,
-      title: title,
-    );
+    final castMedia = CastMedia(contentId: contentID, title: title);
     _castSender.load(castMedia);
-  }
-
-  void setCallbackOnConnect(Function callback) {
-    _callbackOnConnected = callback;
   }
 
   void togglePlayPauseCC() {

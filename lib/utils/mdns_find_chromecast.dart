@@ -12,7 +12,7 @@ class CastDevice {
 }
 
 Future<List<CastDevice>> findChromecasts() async {
-  const String name = '_googlecast._tcp.local';
+  const String name = '_googlecast._tcp';
   final MDnsClient client = MDnsClient();
 
   final Map<String, CastDevice> map = {};
