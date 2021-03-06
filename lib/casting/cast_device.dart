@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:convert' show utf8;
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
-import 'package:logging/logging.dart';
-import 'package:observable/observable.dart';
 
 enum CastDeviceType {
   Unknown,
@@ -26,12 +26,10 @@ enum GoogleCastModelType {
 }
 
 class CastDevice extends ChangeNotifier {
-  final Logger log = Logger('CastDevice');
-
-  final String name;
-  final String type;
-  final String host;
-  final int port;
+  final String? name;
+  final String? type;
+  final String? host;
+  final int? port;
 
   /// Contains the information about the device.
   /// You can decode with utf8 a bunch of information
@@ -45,10 +43,10 @@ class CastDevice extends ChangeNotifier {
   /// * ca - Unknown (e.g. "1234");
   /// * ic - Icon path (e.g. "/setup/icon.png");
   /// * ve - Version (e.g. "04").
-  final Map<String, Uint8List> attr;
+  final Map<String, Uint8List>? attr;
 
-  String _friendlyName;
-  String _modelName;
+  String? _friendlyName;
+  String? _modelName;
 
   CastDevice({
     this.name,
@@ -62,24 +60,23 @@ class CastDevice extends ChangeNotifier {
 
   void initDeviceInfo() async {
     if (CastDeviceType.ChromeCast == deviceType) {
-      if (null != attr && null != attr['fn']) {
-        _friendlyName = utf8.decode(attr['fn']);
-        if (null != attr['md']) {
-          _modelName = utf8.decode(attr['md']);
+      if (null != attr && null != attr!['fn']) {
+        _friendlyName = utf8.decode(attr!['fn']!);
+        if (null != attr!['md']) {
+          _modelName = utf8.decode(attr!['md']!);
         }
       } else {
         // Attributes are not guaranteed to be set, if not set fetch them via the eureka_info url
         // Possible parameters: version,audio,name,build_info,detail,device_info,net,wifi,setup,settings,opt_in,opencast,multizone,proxy,night_mode_params,user_eq,room_equalizer
         try {
-          bool trustSelfSigned = true;
-          HttpClient httpClient = HttpClient()
+          const bool trustSelfSigned = true;
+          final HttpClient httpClient = HttpClient()
             ..badCertificateCallback =
-                ((X509Certificate cert, String host, int port) =>
-                    trustSelfSigned);
-          IOClient ioClient = new IOClient(httpClient);
-          http.Response response = await ioClient.get(
-              'https://${host}:8443/setup/eureka_info?params=name,device_info');
-          Map deviceInfo = jsonDecode(response.body);
+                ((X509Certificate cert, String host, int port) => trustSelfSigned);
+          final IOClient ioClient = IOClient(httpClient);
+          final http.Response response = await ioClient
+              .get(Uri.parse('https://$host:8443/setup/eureka_info?params=name,device_info'));
+          final Map deviceInfo = jsonDecode(response.body);
 
           if (deviceInfo['name'] != null && deviceInfo['name'] != 'Unknown') {
             _friendlyName = deviceInfo['name'];
@@ -91,30 +88,30 @@ class CastDevice extends ChangeNotifier {
             _modelName = deviceInfo['model_name'];
           }
         } catch (exception) {
-          print(exception.toString());
+          log(exception.toString());
         }
       }
     }
-    notifyChange();
+    notifyListeners();
   }
 
   CastDeviceType get deviceType {
-    if (type.contains('_googlecast._tcp')) {
+    if (type!.contains('_googlecast._tcp')) {
       return CastDeviceType.ChromeCast;
-    } else if (type.contains('_airplay._tcp')) {
+    } else if (type!.contains('_airplay._tcp')) {
       return CastDeviceType.AppleTV;
     }
     return CastDeviceType.Unknown;
   }
 
-  String get friendlyName {
+  String? get friendlyName {
     if (null != _friendlyName) {
       return _friendlyName;
     }
     return name;
   }
 
-  String get modelName => _modelName;
+  String? get modelName => _modelName;
 
   GoogleCastModelType get googleModelType {
     switch (modelName) {
@@ -122,7 +119,6 @@ class CastDevice extends ChangeNotifier {
         return GoogleCastModelType.GoogleHome;
       case "Google Home Hub":
         return GoogleCastModelType.GoogleHub;
-        break;
       case "Google Home Mini":
         return GoogleCastModelType.GoogleMini;
       case "Google Home Max":

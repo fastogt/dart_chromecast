@@ -1,23 +1,24 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
-import './../writer.dart';
-import '../proto/cast_channel.pb.dart';
+import 'package:dart_chromecast/proto/cast_channel.pb.dart';
+import 'package:dart_chromecast/utils/writer.dart';
+
 
 abstract class CastChannel {
   static int _requestId = 1;
 
-  final Socket _socket;
-  String _sourceId;
-  String _destinationId;
-  String _namespace;
+  final Socket? _socket;
+  final String? _sourceId;
+  final String? _destinationId;
+  final String? _namespace;
 
-  CastChannel(
-      this._socket, this._sourceId, this._destinationId, this._namespace);
+  CastChannel(this._socket, this._sourceId, this._destinationId, this._namespace);
 
-  CastChannel.CreateWithSocket(Socket socket,
-      {String sourceId, String destinationId, String namespace})
+  CastChannel.createWithSocket(Socket? socket,
+      {String? sourceId, String? destinationId, String? namespace})
       : _socket = socket,
         _sourceId = sourceId,
         _destinationId = destinationId,
@@ -26,30 +27,23 @@ abstract class CastChannel {
   void sendMessage(Map payload) async {
     payload['requestId'] = _requestId;
 
-    CastMessage castMessage = CastMessage();
+    final CastMessage castMessage = CastMessage();
     castMessage.protocolVersion = CastMessage_ProtocolVersion.CASTV2_1_0;
-    castMessage.sourceId = _sourceId;
-    castMessage.destinationId = _destinationId;
-    castMessage.namespace = _namespace;
+    castMessage.sourceId = _sourceId!;
+    castMessage.destinationId = _destinationId!;
+    castMessage.namespace = _namespace!;
     castMessage.payloadType = CastMessage_PayloadType.STRING;
     castMessage.payloadUtf8 = jsonEncode(payload);
 
-    Uint8List bytes = castMessage.writeToBuffer();
-    Uint32List headers =
-        Uint32List.fromList(writeUInt32BE(List<int>(4), bytes.lengthInBytes));
-    Uint32List fullData =
-        Uint32List.fromList(headers.toList()..addAll(bytes.toList()));
+    final Uint8List bytes = castMessage.writeToBuffer();
+    final Uint32List headers = Uint32List.fromList(writeUInt32BE(bytes.lengthInBytes));
+    final Uint32List fullData = Uint32List.fromList(headers.toList()..addAll(bytes.toList()));
 
-    if ('PING' != payload['type']) {
-      // print('Send: ${castMessage.toDebugString()}');
-      // print('List: ${fullData.toList().toString()}');
-
-    } else {
-      print('PING');
+    if ('PING' == payload['type']) {
+      log('PING');
     }
 
-    _socket.add(fullData);
-
+    _socket!.add(fullData);
     _requestId++;
   }
 }

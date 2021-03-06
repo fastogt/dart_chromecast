@@ -1,11 +1,10 @@
 class CastMedia {
-
-  final String contentId;
-  String title;
+  final String? contentId;
+  String? title;
   bool autoPlay = true;
   double position;
   String contentType;
-  List<String> images;
+  List<String>? images;
 
   CastMedia({
     this.contentId,
@@ -15,9 +14,7 @@ class CastMedia {
     this.contentType = 'video/mp4',
     this.images,
   }) {
-    if (null == images) {
-      images = [];
-    }
+    images ??= [];
   }
 
   Map toChromeCastMap() {
@@ -35,5 +32,4 @@ class CastMedia {
       }
     };
   }
-
 }

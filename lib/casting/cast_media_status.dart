@@ -1,13 +1,9 @@
 import 'dart:convert';
-import 'package:logging/logging.dart';
 
 class CastMediaStatus {
+  final dynamic? _sessionId;
 
-  final Logger log = new Logger('CastMediaStatus');
-
-  dynamic _sessionId;
-
-  final String _nativeStatus;
+  final String? _nativeStatus;
   final bool _isPlaying;
   final bool _isPaused;
   final bool _isMuted ;
@@ -17,9 +13,9 @@ class CastMediaStatus {
   final bool _hasError;
   final bool _isLoading;
   final bool _isBuffering;
-  final double _volume;
-  final double _position;
-  final Map _media;
+  final double? _volume;
+  final double? _position;
+  final Map? _media;
 
   CastMediaStatus.fromChromeCastMediaStatus(Map mediaStatus)
       : _sessionId = mediaStatus['mediaSessionId'],
@@ -39,7 +35,7 @@ class CastMediaStatus {
 
   dynamic get sessionId => _sessionId;
 
-  String get nativeStatus => _nativeStatus;
+  String? get nativeStatus => _nativeStatus;
 
   bool get isIdle => _isIdle;
 
@@ -59,11 +55,11 @@ class CastMediaStatus {
 
   bool get hasError => _hasError;
 
-  double get volume => _volume;
+  double? get volume => _volume;
 
-  double get position => _position;
+  double? get position => _position;
 
-  Map get media => _media;
+  Map? get media => _media;
 
   @override
   String toString() {
