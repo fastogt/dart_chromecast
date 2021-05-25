@@ -19,7 +19,7 @@ dependencies:
       ref: master
   protobuf: ^2.0.0
   protoc_plugin: ^20.0.0
-  rxdart: ^0.26.0
+  rxdart: ^0.27.0
 
 
 dev_dependencies:
