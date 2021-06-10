@@ -50,7 +50,7 @@ class ChromeCastInfo {
   void disconnectDialog(BuildContext context,
       {VoidCallback? onDisconnected,
       CCDisconnectDialogText translations = const CCDisconnectDialogText()}) {
-    if (_connected.value!) {
+    if (_connected.value) {
       showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -97,7 +97,7 @@ class ChromeCastInfo {
 
   Stream<List<CastDevice>> get foundServices => _foundServices.stream;
 
-  bool get castConnected => _connected.value!;
+  bool get castConnected => _connected.value;
 
   Stream<bool> get castConnectedStream => _connected.stream;
 
@@ -117,7 +117,7 @@ class ChromeCastInfo {
 
   double? position() => _castSender?.castSession?.castMediaStatus?.position;
 
-  bool serviceFound() => _foundServices.value?.isNotEmpty ?? false;
+  bool serviceFound() => _foundServices.value.isNotEmpty;
 
   void initVideo(String contentID, String title) {
     if (_castSender == null) {
