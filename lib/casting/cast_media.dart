@@ -3,6 +3,7 @@ class CastMedia {
   String? title;
   bool autoPlay = true;
   double position;
+  double playbackRate;
   String contentType;
   List<String>? images;
 
@@ -11,6 +12,7 @@ class CastMedia {
     this.title,
     this.autoPlay = true,
     this.position = 0.0,
+    this.playbackRate = 1.0,
     this.contentType = 'video/mp4',
     this.images,
   }) {
@@ -22,6 +24,7 @@ class CastMedia {
       'type': 'LOAD',
       'autoPlay': autoPlay,
       'currentTime': position,
+      'playbackRate': playbackRate,
       'activeTracks': [],
       'media': {
         'contentId': contentId,

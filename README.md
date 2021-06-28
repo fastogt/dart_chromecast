@@ -53,6 +53,9 @@ In this demo the following keys can be used to control the playback of the video
 `left arrow key` seek -10 seconds \
 `right arrow key` seek +10 seconds
 
+### example
+`dart example/index.dart http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4`
+
 ### reconnecting to active session
 When you exit the command line without disconnecting the device, the video will keep playing. 
 To reconnect without messing with the current playlist, just run the command without any media urls. Eg:
