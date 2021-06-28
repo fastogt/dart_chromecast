@@ -29,7 +29,8 @@ class ChromeCastDevicePicker extends StatelessWidget {
         contentPadding: const EdgeInsets.fromLTRB(8, 20.0, 8, 0),
         actions: <Widget>[
           TextButton(
-              child: Text(text.cancel, style: TextStyle(color: Theme.of(context).accentColor)),
+              child: Text(text.cancel,
+                  style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
               onPressed: () {
                 Navigator.pop(context, false);
               })

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:dart_chromecast/casting/cast.dart';
+import 'package:dart_chromecast/utils/mdns_find_chromecast.dart' as find;
 import 'package:dart_chromecast/widgets/device_picker.dart';
 import 'package:dart_chromecast/widgets/disconnect_dialog.dart';
-import 'package:dart_chromecast/utils/mdns_find_chromecast.dart' as find;
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
