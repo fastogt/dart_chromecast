@@ -1,18 +1,22 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dart_chromecast/casting/cast_device.dart';
 import 'package:dart_chromecast/chromecast.dart';
 import 'package:flutter/material.dart';
 
 class ChromeCastDevicePickerText {
+  final String broadcast;
   final String chooseDevice;
   final String connecting;
   final String cancel;
 
-  const ChromeCastDevicePickerText(
-      {this.chooseDevice = "Choose device",
+  const ChromeCastDevicePickerText({
+      this.broadcast = "Broadcast on",
+      this.chooseDevice = "Choose device",
       this.connecting = "Connecting",
-      this.cancel = "Cancel"});
+      this.cancel = "Cancel"
+  });
 }
 
 class ChromeCastDevicePicker extends StatelessWidget {
@@ -24,9 +28,15 @@ class ChromeCastDevicePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        title: Text(text.chooseDevice),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15)),
+        title: Column(children: [
+          Text(text.broadcast, style: TextStyle(fontSize: 25)),
+          const Divider(thickness: 1),
+          const SizedBox(height: 30),
+          Text(text.chooseDevice, style: TextStyle(fontSize: 15)),
+        ]),
         content: _devices(),
-        contentPadding: const EdgeInsets.fromLTRB(8, 20.0, 8, 0),
         actions: <Widget>[
           TextButton(
               child: Text(text.cancel,
@@ -84,7 +94,21 @@ class _CastDeviceTileState extends State<CastDeviceTile> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(title: Text(widget.device.friendlyName ?? ''), onTap: widget.onTap);
+    String os = Platform.operatingSystem;
+    return Card(
+      color: Colors.white38,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: ListTile(
+          leading: Container(height: double.infinity, child: Icon(Icons.tv_outlined)),
+          title: Row(children: [
+            Text('[${os.replaceFirst(os[0], os[0].toUpperCase())}] '),
+            Text(widget.device.friendlyName ?? ''),
+          ]),
+          onTap: widget.onTap
+      ),
+    );
   }
 
   void _update() {
