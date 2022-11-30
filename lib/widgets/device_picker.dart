@@ -100,7 +100,7 @@ class _CastDeviceTileState extends State<CastDeviceTile> {
       ),
       child: ListTile(
           leading: Container(height: double.infinity, child: const Icon(Icons.tv_outlined)),
-          title: Text(widget.device.friendlyName ?? ''),
+          title: Text(widget.device.friendlyName ?? 'Unknown'),
           subtitle: Text('${castDeviceTypeToText(widget.device.deviceType)}'),
           onTap: widget.onTap
       ),
