@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dart_chromecast/casting/cast_device.dart';
 import 'package:dart_chromecast/chromecast.dart';
@@ -31,10 +30,10 @@ class ChromeCastDevicePicker extends StatelessWidget {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15)),
         title: Column(children: [
-          Text(text.broadcast, style: TextStyle(fontSize: 25)),
+          Text(text.broadcast, style: const TextStyle(fontSize: 25)),
           const Divider(thickness: 1),
           const SizedBox(height: 30),
-          Text(text.chooseDevice, style: TextStyle(fontSize: 15)),
+          Text(text.chooseDevice, style: const TextStyle(fontSize: 15)),
         ]),
         content: _devices(),
         actions: <Widget>[
@@ -94,18 +93,15 @@ class _CastDeviceTileState extends State<CastDeviceTile> {
 
   @override
   Widget build(BuildContext context) {
-    String os = Platform.operatingSystem;
     return Card(
       color: Colors.white38,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
       ),
       child: ListTile(
-          leading: Container(height: double.infinity, child: Icon(Icons.tv_outlined)),
-          title: Row(children: [
-            Text('[${os.replaceFirst(os[0], os[0].toUpperCase())}] '),
-            Text(widget.device.friendlyName ?? ''),
-          ]),
+          leading: Container(height: double.infinity, child: const Icon(Icons.tv_outlined)),
+          title: Text(widget.device.friendlyName ?? 'Unknown'),
+          subtitle: Text('${castDeviceTypeToText(widget.device.deviceType)}'),
           onTap: widget.onTap
       ),
     );
