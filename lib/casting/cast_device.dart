@@ -25,6 +25,15 @@ enum GoogleCastModelType {
   CastGroup,
 }
 
+String castDeviceTypeToText(CastDeviceType cast) {
+  if (cast == CastDeviceType.ChromeCast) {
+    return 'ChromeCast';
+  } else if (cast == CastDeviceType.AppleTV) {
+    return 'AppleTV';
+  }
+  return 'Unknown';
+}
+
 class CastDevice extends ChangeNotifier {
   final String? name;
   final String? type;
