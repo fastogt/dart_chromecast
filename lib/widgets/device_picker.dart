@@ -27,6 +27,7 @@ class ChromeCastDevicePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+        scrollable: true,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15)),
         title: Column(children: [
@@ -36,6 +37,8 @@ class ChromeCastDevicePicker extends StatelessWidget {
           Text(text.chooseDevice, style: const TextStyle(fontSize: 15)),
         ]),
         content: _devices(),
+        contentPadding: const EdgeInsets.only(top: 10.0, left: 15.0, right: 15.0),
+        actionsPadding: const EdgeInsets.only(top: 5.0),
         actions: <Widget>[
           TextButton(
               child: Text(text.cancel,
