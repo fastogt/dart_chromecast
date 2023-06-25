@@ -11,12 +11,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.0
+  http: ^1.0.0
   multicast_dns: ^0.3.0
   protobuf: ^2.0.0
   protoc_plugin: ^20.0.0
   rxdart: ^0.27.1
-
 
 dev_dependencies:
   dart_rules:
